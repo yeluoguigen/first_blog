@@ -4,6 +4,13 @@ from django.http import HttpResponseBadRequest,HttpResponse
 from libs.captcha.captcha import captcha
 from django_redis import get_redis_connection
 
+from django.http import JsonResponse
+from utils.response_code import RETCODE
+from random import randint
+from libs.yuntongxun.sms import CCP
+import logging
+logger=logging.getLogger('django')
+
 class RegisterView(View):
     def get(self,request):
         """
@@ -29,4 +36,41 @@ class ImageCodeView(View):
         print('ceshi')
         #返回相应，将生成的图片以content_type为image/jpeg的形式返回给请求
         return HttpResponse(image,content_type='image/jpeg')
+
+class SmsCodeView(View):
+    def get(self,request):
+        #接收参数
+        image_code_client = request.GET.get('image_code')
+        uuid = request.GET.get('uuid')
+        mobile = request.GET.get('mobile')
+
+        #校验参数
+        if not all([image_code_client,uuid,mobile]):
+            return JsonResponse({"code":RETCODE.NECESSARYPARAMERR,"ERRMSG":"缺少必传参数"})
+        #创建连接到redis的对象
+        redis_conn= get_redis_connection('default')
+        #提取图形验证码
+        image_code_server = redis_conn.get('img:%s'%uuid)
+        if image_code_server is None:
+            return JsonResponse({"code":RETCODE.IMAGECODEERR,"errmsg":"验证码失效"})
+        #删除验证码，避免恶意测试验证码
+        try:
+            redis_conn.delete('img:%s'%uuid)
+        except Exception as e:
+            logger.error(e)
+        #对比图形验证码
+        image_code_server = image_code_server.decode() #byte转字符串
+        if image_code_server.lower() != image_code_client.lower():
+            return JsonResponse({"code":RETCODE.IMAGECODEERR,"errmsg":"输入验证码有误"})
+        #生成短信验证码:生成6位数验证码
+        sms_coed = '%06d'%randint(0,999999)
+        logger.info(sms_coed)
+        #保存验证码到redis中，并设置有效期
+        redis_conn.setex('sms:%s'%mobile,300,sms_coed)
+        #发送短信验证码
+        CCP().send_template_sms(mobile,[sms_coed,5],1)
+
+        #响应结果
+        return JsonResponse({"code":RETCODE.OK,"errmsg":"发送短信成功"})
+
 
