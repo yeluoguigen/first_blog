@@ -11,7 +11,8 @@ from libs.yuntongxun.sms import CCP
 import re
 from users.models import User
 from django.db import DatabaseError
-
+from django.shortcuts import redirect
+from django.urls import reverse
 import logging
 logger=logging.getLogger('django')
 
@@ -52,9 +53,19 @@ class RegisterView(View):
         #保存注册数据
         try:
             user = User.objects.create_user(username=mobile,mobile = mobile,password = password2)
-        except Exception as e:
+        except DatabaseError as e:
             return HttpResponseBadRequest('注册失败')
-        return HttpResponse('注册成功给，重定向到首页')
+        #实现状态保持
+        from django.contrib.auth import login
+        login(request,user)
+        #跳转到首页
+        response = redirect(reverse('home:index'))
+        #设置cookie
+        #登录状态，会话结束后自动过期
+        response.set_cookie('is_login',True)
+        #设置用户名有效期是1个月
+        response.set_cookie('username',user.username,max_age=30*24*3600)
+        return response
 
 
 class ImageCodeView(View):
