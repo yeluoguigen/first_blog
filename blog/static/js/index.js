@@ -10,7 +10,7 @@ var vm = new Vue({
     },
     mounted(){
         this.username=getCookie('username');
-        // this.is_login=getCookie('is_login');
+        this.is_login=getCookie('is_login');
         this.is_login=true
     },
     methods: {
