@@ -186,15 +186,15 @@ class ForgetPasswordView(View):
         mobile = request.POST.get('mobile')
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
-        smscode = request.POST.get('smscode')
+        smscode = request.POST.get('sms_code')
         #判断参数是否齐全
         if not all([mobile,password,password2,smscode]):
             return HttpResponseBadRequest('缺少必传参数')
         #判断手机号是否合法
-        if not re.match('^1[3-9]\d{9}$]',mobile):
+        if not re.match(r'^1[3-9]\d{9}$',mobile):
             return HttpResponseBadRequest('请输入正确的电话号码')
         #判断密码是否是8到20个数字
-        if not re.match('^[0-9A-Za-z]{8-20}$',password):
+        if not re.match(r'^[0-9A-Za-z]{8,20}$',password):
             return HttpResponseBadRequest('请输入8到20位的密码')
         #判断两次密码是否一致
         if password != password2:
@@ -220,6 +220,7 @@ class ForgetPasswordView(View):
             user.set_password(password)
             user.save()
         #跳转到登录页面
-        response=  redirect(reverse('users.login'))
+        response = redirect(reverse('users:login'))
+        return response
 
 
