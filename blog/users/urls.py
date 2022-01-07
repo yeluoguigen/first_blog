@@ -13,3 +13,5 @@ urlpatterns = [
     path('forgetpassword/',ForgetPasswordView.as_view(),name = 'forgetpassword'),
     path('center/',UserCenterView.as_view(),name='center'),
 ]
+
+
