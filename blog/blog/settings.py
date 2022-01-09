@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
+    'home.apps.HomeConfig',
 ]
 
 MIDDLEWARE = [
@@ -165,9 +166,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-Hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -181,7 +182,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 LOGIN_URL = '/login/'
+#图片的统一路由
+MEDIA_URL = '/media/'
 # 配置静态文件加载路径
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
+#设置图片上传路径
+MEDIA_ROOT = os.path.join(BASE_DIR,'meida/')
 AUTH_USER_MODEL = 'users.User'
