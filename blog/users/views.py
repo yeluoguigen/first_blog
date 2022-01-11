@@ -1,9 +1,7 @@
 from django.shortcuts import render
-from django.views import View
 from django.http import HttpResponseBadRequest,HttpResponse
 from libs.captcha.captcha import captcha
 from django_redis import get_redis_connection
-
 from django.http import JsonResponse
 from utils.response_code import RETCODE
 from random import randint
@@ -313,4 +311,7 @@ class WriteBlogView(LoginRequiredMixin,View):
         #返回响应，跳转到文章详情页面
         #暂时跳转到首页
         return redirect(reverse('home:index'))
+
+
+
 
